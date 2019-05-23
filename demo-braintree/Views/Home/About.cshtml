@@ -1,0 +1,53 @@
+﻿<head>
+    <meta charset="utf-8">
+    <script src="https://js.braintreegateway.com/js/braintree-2.32.1.min.js"></script>
+    <script src="https://js.braintreegateway.com/web/dropin/1.17.2/js/dropin.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+</head>
+<body>
+    <div id="dropin-wrapper">
+        <div id="checkout-message"></div>
+        <div id="dropin-container"></div>
+        <button id="submit-button">Submit payment</button>
+    </div>
+    <script>
+        var button = document.querySelector('#submit-button');
+
+        braintree.dropin.create({
+            // Insert your tokenization key here
+            authorization: 'eyJ2ZXJzaW9uIjoyLCJhdXRob3JpemF0aW9uRmluZ2VycHJpbnQiOiJmMjNmZWU5MTkxMGU5YmUyZWZiYzZmMTI5MmNiZmRlM2NkZWYzYzUwZGZlZDBkYzU0MWE5MDU0YTQ0OGQxZjM2fGNyZWF0ZWRfYXQ9MjAxOS0wNS0wN1QwNzoyNzowMS4yMjMyMTI4MzYrMDAwMFx1MDAyNm1lcmNoYW50X2lkPXNnOTk2NHJiOXZyZ3h4cHRcdTAwMjZwdWJsaWNfa2V5PTd5bnljdmZidGI4dGt3NWoiLCJjb25maWdVcmwiOiJodHRwczovL2FwaS5zYW5kYm94LmJyYWludHJlZWdhdGV3YXkuY29tOjQ0My9tZXJjaGFudHMvc2c5OTY0cmI5dnJneHhwdC9jbGllbnRfYXBpL3YxL2NvbmZpZ3VyYXRpb24iLCJncmFwaFFMIjp7InVybCI6Imh0dHBzOi8vcGF5bWVudHMuc2FuZGJveC5icmFpbnRyZWUtYXBpLmNvbS9ncmFwaHFsIiwiZGF0ZSI6IjIwMTgtMDUtMDgifSwiY2hhbGxlbmdlcyI6W10sImVudmlyb25tZW50Ijoic2FuZGJveCIsImNsaWVudEFwaVVybCI6Imh0dHBzOi8vYXBpLnNhbmRib3guYnJhaW50cmVlZ2F0ZXdheS5jb206NDQzL21lcmNoYW50cy9zZzk5NjRyYjl2cmd4eHB0L2NsaWVudF9hcGkiLCJhc3NldHNVcmwiOiJodHRwczovL2Fzc2V0cy5icmFpbnRyZWVnYXRld2F5LmNvbSIsImF1dGhVcmwiOiJodHRwczovL2F1dGgudmVubW8uc2FuZGJveC5icmFpbnRyZWVnYXRld2F5LmNvbSIsImFuYWx5dGljcyI6eyJ1cmwiOiJodHRwczovL29yaWdpbi1hbmFseXRpY3Mtc2FuZC5zYW5kYm94LmJyYWludHJlZS1hcGkuY29tL3NnOTk2NHJiOXZyZ3h4cHQifSwidGhyZWVEU2VjdXJlRW5hYmxlZCI6dHJ1ZSwicGF5cGFsRW5hYmxlZCI6dHJ1ZSwicGF5cGFsIjp7ImRpc3BsYXlOYW1lIjoiTXlDbHViMiIsImNsaWVudElkIjpudWxsLCJwcml2YWN5VXJsIjoiaHR0cDovL2V4YW1wbGUuY29tL3BwIiwidXNlckFncmVlbWVudFVybCI6Imh0dHA6Ly9leGFtcGxlLmNvbS90b3MiLCJiYXNlVXJsIjoiaHR0cHM6Ly9hc3NldHMuYnJhaW50cmVlZ2F0ZXdheS5jb20iLCJhc3NldHNVcmwiOiJodHRwczovL2NoZWNrb3V0LnBheXBhbC5jb20iLCJkaXJlY3RCYXNlVXJsIjpudWxsLCJhbGxvd0h0dHAiOnRydWUsImVudmlyb25tZW50Tm9OZXR3b3JrIjp0cnVlLCJlbnZpcm9ubWVudCI6Im9mZmxpbmUiLCJ1bnZldHRlZE1lcmNoYW50IjpmYWxzZSwiYnJhaW50cmVlQ2xpZW50SWQiOiJtYXN0ZXJjbGllbnQzIiwiYmlsbGluZ0FncmVlbWVudHNFbmFibGVkIjp0cnVlLCJtZXJjaGFudEFjY291bnRJZCI6Im15Y2x1YjIiLCJjdXJyZW5jeUlzb0NvZGUiOiJVU0QifSwibWVyY2hhbnRJZCI6InNnOTk2NHJiOXZyZ3h4cHQiLCJ2ZW5tbyI6Im9mZiJ9',
+            container: '#dropin-container'
+        }, function (createErr, instance) {
+            button.addEventListener('click', function () {
+                instance.requestPaymentMethod(function (requestPaymentMethodErr, payload) {
+                    // When the user clicks on the 'Submit payment' button this code will send the
+                    // encrypted payment information in a variable called a payment method nonce
+                    $.ajax({
+                        type: 'POST',
+                        url: "http://localhost:63794/CustomTrans",
+                        data: { 'paymentMethodNonce': "fake-valid-nonce" }
+                        //data: { 'paymentMethodNonce': payload.nonce }
+                    }).done(function (result) {
+                        // Tear down the Drop-in UI
+                        instance.teardown(function (teardownErr) {
+                            if (teardownErr) {
+                                console.error('Could not tear down Drop-in UI!');
+                            } else {
+                                console.info('Drop-in UI has been torn down!');
+                                // Remove the 'Submit payment' button
+                                $('#submit-button').remove();
+                            }
+                        });
+
+                        if (result.success) {
+                            $('#checkout-message').html('<h1>Success</h1><p>Your Drop-in UI is working! Check your <a href="https://sandbox.braintreegateway.com/login">sandbox Control Panel</a> for your test transactions.</p><p>Refresh to try another transaction.</p>');
+                        } else {
+                            console.log(result);
+                            $('#checkout-message').html('<h1>Error</h1><p>Check your console.</p>');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
